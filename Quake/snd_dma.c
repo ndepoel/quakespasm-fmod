@@ -30,6 +30,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static void S_Play (void);
 static void S_PlayVol (void);
+
+#ifndef USE_FMOD
+
 static void S_SoundList (void);
 static void S_Update_ (void);
 void S_StopAllSounds (qboolean clear);
@@ -43,7 +46,6 @@ channel_t	snd_channels[MAX_CHANNELS];
 int		total_channels;
 
 static int	snd_blocked = 0;
-static qboolean	snd_initialized = false;
 
 static dma_t	sn;
 volatile dma_t	*shm = NULL;
@@ -61,19 +63,27 @@ int		paintedtime;	// sample PAIRS
 int		s_rawend;
 portable_samplepair_t	s_rawsamples[MAX_RAW_SAMPLES];
 
+#endif	// USE_FMOD
 
 #define	MAX_SFX		1024
-static sfx_t	*known_sfx = NULL;	// hunk allocated [MAX_SFX]
-static int	num_sfx;
+sfx_t	*known_sfx = NULL;	// hunk allocated [MAX_SFX]
+int		num_sfx;
 
 static sfx_t	*ambient_sfx[NUM_AMBIENTS];
 
-static qboolean	sound_started = false;
+qboolean	sound_started = false;
+static qboolean	snd_initialized = false;
 
 cvar_t		bgmvolume = {"bgmvolume", "1", CVAR_ARCHIVE};
 cvar_t		sfxvolume = {"volume", "0.7", CVAR_ARCHIVE};
 
-cvar_t		precache = {"precache", "1", CVAR_NONE};
+cvar_t		precache = { "precache", "1", CVAR_NONE };
+cvar_t		nosound = { "nosound", "0", CVAR_NONE };
+cvar_t		ambient_level = { "ambient_level", "0.3", CVAR_NONE };
+cvar_t		ambient_fade = { "ambient_fade", "100", CVAR_NONE };
+
+#ifndef USE_FMOD
+
 cvar_t		loadas8bit = {"loadas8bit", "0", CVAR_NONE};
 
 cvar_t		sndspeed = {"sndspeed", "11025", CVAR_NONE};
@@ -88,13 +98,9 @@ cvar_t		snd_mixspeed = {"snd_mixspeed", "44100", CVAR_NONE};
 cvar_t		snd_filterquality = {"snd_filterquality", SND_FILTERQUALITY_DEFAULT,
 								 CVAR_NONE};
 
-static	cvar_t	nosound = {"nosound", "0", CVAR_NONE};
-static	cvar_t	ambient_level = {"ambient_level", "0.3", CVAR_NONE};
-static	cvar_t	ambient_fade = {"ambient_fade", "100", CVAR_NONE};
 static	cvar_t	snd_noextraupdate = {"snd_noextraupdate", "0", CVAR_NONE};
 static	cvar_t	snd_show = {"snd_show", "0", CVAR_NONE};
 static	cvar_t	_snd_mixahead = {"_snd_mixahead", "0.1", CVAR_ARCHIVE};
-
 
 static void S_SoundInfo_f (void)
 {
@@ -153,6 +159,7 @@ void S_Startup (void)
 	}
 }
 
+#endif	// USE_FMOD
 
 /*
 ================
@@ -172,16 +179,19 @@ void S_Init (void)
 	Cvar_RegisterVariable(&nosound);
 	Cvar_RegisterVariable(&sfxvolume);
 	Cvar_RegisterVariable(&precache);
-	Cvar_RegisterVariable(&loadas8bit);
 	Cvar_RegisterVariable(&bgmvolume);
 	Cvar_RegisterVariable(&ambient_level);
 	Cvar_RegisterVariable(&ambient_fade);
+
+#ifndef USE_FMOD
+	Cvar_RegisterVariable(&loadas8bit);
 	Cvar_RegisterVariable(&snd_noextraupdate);
 	Cvar_RegisterVariable(&snd_show);
 	Cvar_RegisterVariable(&_snd_mixahead);
 	Cvar_RegisterVariable(&sndspeed);
 	Cvar_RegisterVariable(&snd_mixspeed);
 	Cvar_RegisterVariable(&snd_filterquality);
+#endif	// USE_FMOD
 	
 	if (safemode || COM_CheckParm("-nosound"))
 		return;
@@ -190,6 +200,7 @@ void S_Init (void)
 
 	Cmd_AddCommand("play", S_Play);
 	Cmd_AddCommand("playvol", S_PlayVol);
+#ifndef USE_FMOD
 	Cmd_AddCommand("stopsound", S_StopAllSoundsC);
 	Cmd_AddCommand("soundlist", S_SoundList);
 	Cmd_AddCommand("soundinfo", S_SoundInfo_f);
@@ -216,6 +227,7 @@ void S_Init (void)
 	Cvar_SetCallback(&snd_filterquality, &SND_Callback_snd_filterquality);
 
 	SND_InitScaletable ();
+#endif	// USE_FMOD
 
 	known_sfx = (sfx_t *) Hunk_AllocName (MAX_SFX*sizeof(sfx_t), "sfx_t");
 	num_sfx = 0;
@@ -226,6 +238,7 @@ void S_Init (void)
 	if (sound_started == 0)
 		return;
 
+#ifndef USE_FMOD
 // provides a tick sound until washed clean
 //	if (shm->buffer)
 //		shm->buffer[4] = shm->buffer[5] = 0x7f;	// force a pop for debugging
@@ -234,10 +247,12 @@ void S_Init (void)
 	ambient_sfx[AMBIENT_SKY] = S_PrecacheSound ("ambience/wind2.wav");
 
 	S_CodecInit ();
+#endif	// USE_FMOD
 
 	S_StopAllSounds (true);
 }
 
+#ifndef USE_FMOD
 
 // =======================================================================
 // Shutdown sound engine
@@ -256,6 +271,7 @@ void S_Shutdown (void)
 	shm = NULL;
 }
 
+#endif	// USE_FMOD
 
 // =======================================================================
 // Load a sound
@@ -267,7 +283,7 @@ S_FindName
 
 ==================
 */
-static sfx_t *S_FindName (const char *name)
+sfx_t *S_FindName (const char *name)
 {
 	int		i;
 	sfx_t	*sfx;
@@ -298,6 +314,7 @@ static sfx_t *S_FindName (const char *name)
 	return sfx;
 }
 
+#ifndef USE_FMOD
 
 /*
 ==================
@@ -315,6 +332,8 @@ void S_TouchSound (const char *name)
 	sfx = S_FindName (name);
 	Cache_Check (&sfx->cache);
 }
+
+#endif	// USE_FMOD
 
 /*
 ==================
@@ -338,6 +357,7 @@ sfx_t *S_PrecacheSound (const char *name)
 	return sfx;
 }
 
+#ifndef USE_FMOD
 
 //=============================================================================
 
@@ -958,6 +978,8 @@ void S_UnblockSound (void)
 	}
 }
 
+#endif	// USE_FMOD
+
 /*
 ===============================================================================
 
@@ -1010,6 +1032,8 @@ static void S_PlayVol (void)
 	}
 }
 
+#ifndef USE_FMOD
+
 static void S_SoundList (void)
 {
 	int		i;
@@ -1034,6 +1058,7 @@ static void S_SoundList (void)
 	Con_Printf ("%i sounds, %i bytes\n", num_sfx, total); //johnfitz -- added count
 }
 
+#endif	// USE_FMOD
 
 void S_LocalSound (const char *name)
 {
@@ -1067,4 +1092,3 @@ void S_BeginPrecaching (void)
 void S_EndPrecaching (void)
 {
 }
-

@@ -242,6 +242,7 @@ int COM_OpenFile (const char *filename, int *handle, unsigned int *path_id);
 int COM_FOpenFile (const char *filename, FILE **file, unsigned int *path_id);
 qboolean COM_FileExists (const char *filename, unsigned int *path_id);
 void COM_CloseFile (int h);
+qboolean COM_FullFilePath(const char *filename, char *netpath, size_t size);
 
 // these procedures open a file using COM_FindFile and loads it into a proper
 // buffer. the buffer is allocated with a total size of com_filesize + 1. the

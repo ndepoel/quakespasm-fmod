@@ -25,6 +25,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef __QUAKE_SOUND__
 #define __QUAKE_SOUND__
 
+#if USE_FMOD
+typedef struct FMOD_SOUND FMOD_SOUND;
+#endif
+
 /* !!! if this is changed, it must be changed in asm_i386.h too !!! */
 typedef struct
 {
@@ -36,6 +40,12 @@ typedef struct sfx_s
 {
 	char	name[MAX_QPATH];
 	cache_user_t	cache;
+#if USE_FMOD
+	FMOD_SOUND *sound;
+	unsigned int length;	// milliseconds
+	int loopstart;
+	int loopend;
+#endif
 } sfx_t;
 
 /* !!! if this is changed, it must be changed in asm_i386.h too !!! */
@@ -178,6 +188,10 @@ extern	cvar_t		loadas8bit;
 extern	portable_samplepair_t	s_rawsamples[MAX_RAW_SAMPLES];
 
 extern	cvar_t		bgmvolume;
+
+extern	cvar_t		nosound;
+extern	cvar_t		ambient_level;
+extern	cvar_t		ambient_fade;
 
 void S_LocalSound (const char *name);
 sfxcache_t *S_LoadSound (sfx_t *s);

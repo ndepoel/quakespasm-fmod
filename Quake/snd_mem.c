@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
+#ifndef USE_FMOD
+
 /*
 ================
 ResampleSfx
@@ -160,7 +162,7 @@ sfxcache_t *S_LoadSound (sfx_t *s)
 	return sc;
 }
 
-
+#endif	// USE_FMOD
 
 /*
 ===============================================================================

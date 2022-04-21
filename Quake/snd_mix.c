@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
+#ifndef USE_FMOD
+
 #define	PAINTBUFFER_SIZE	2048
 portable_samplepair_t paintbuffer[PAINTBUFFER_SIZE];
 int		snd_scaletable[32][256];
@@ -525,3 +527,4 @@ static void SND_PaintChannelFrom16 (channel_t *ch, sfxcache_t *sc, int count, in
 	ch->pos += count;
 }
 
+#endif	// USE_FMOD

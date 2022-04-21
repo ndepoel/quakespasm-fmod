@@ -24,6 +24,8 @@
 
 #include "quakedef.h"
 
+#ifndef USE_FMOD
+
 #if defined(SDL_FRAMEWORK) || defined(NO_SDL_CONFIG)
 #if defined(USE_SDL2)
 #include <SDL2/SDL.h>
@@ -210,3 +212,4 @@ void SNDDMA_UnblockSound (void)
 	SDL_PauseAudio(0);
 }
 
+#endif	// USE_FMOD

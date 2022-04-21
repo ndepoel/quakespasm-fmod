@@ -1598,11 +1598,9 @@ If neither of file or handle is set, this
 can be used for detecting a file's presence.
 ===========
 */
-static int COM_FindFile (const char *filename, int *handle, FILE **file,
-							unsigned int *path_id)
+static int COM_FindFile2(const char *filename, int *handle, FILE **file, unsigned int *path_id, char *netpath, size_t size)
 {
 	searchpath_t	*search;
-	char		netpath[MAX_OSPATH];
 	pack_t		*pak;
 	int		i, findtime;
 
@@ -1610,6 +1608,7 @@ static int COM_FindFile (const char *filename, int *handle, FILE **file,
 		Sys_Error ("COM_FindFile: both handle and file set");
 
 	file_from_pak = 0;
+	memset(netpath, 0, size);
 
 //
 // search through the path, one element at a time
@@ -1655,7 +1654,7 @@ static int COM_FindFile (const char *filename, int *handle, FILE **file,
 					continue;
 			}
 
-			q_snprintf (netpath, sizeof(netpath), "%s/%s",search->filename, filename);
+			q_snprintf (netpath, size, "%s/%s",search->filename, filename);
 			findtime = Sys_FileTime (netpath);
 			if (findtime == -1)
 				continue;
@@ -1697,6 +1696,11 @@ static int COM_FindFile (const char *filename, int *handle, FILE **file,
 	return com_filesize;
 }
 
+static int COM_FindFile(const char *filename, int *handle, FILE **file, unsigned int *path_id)
+{
+	char netpath[MAX_OSPATH];
+	return COM_FindFile2(filename, handle, file, path_id, netpath, sizeof(netpath));
+}
 
 /*
 ===========
@@ -1756,6 +1760,22 @@ void COM_CloseFile (int h)
 	Sys_FileClose (h);
 }
 
+/*
+================
+COM_FullFilePath
+
+Get the full canonical file path of the requested file on disk.
+If it is inside a pak file, this returns false.
+================
+*/
+qboolean COM_FullFilePath(const char *filename, char *netpath, size_t size)
+{
+	int ret = COM_FindFile2(filename, NULL, NULL, NULL, netpath, size);
+	if (ret < 0 || !*netpath || file_from_pak)
+		return false;
+
+	return true;
+}
 
 /*
 ============
