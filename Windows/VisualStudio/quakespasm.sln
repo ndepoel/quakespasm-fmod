@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "quakespasm", "quakespasm.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "quakespasm-sdl2", "quakespasm-sdl2.vcxproj", "{AE77266F-0A23-4F08-A491-369DE664B273}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "quakespasm-fmod", "quakespasm-fmod.vcxproj", "{67E33033-6E1D-47E6-9C6C-FAC732631822}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -31,6 +33,14 @@ Global
 		{AE77266F-0A23-4F08-A491-369DE664B273}.Release|Win32.Build.0 = Release|Win32
 		{AE77266F-0A23-4F08-A491-369DE664B273}.Release|x64.ActiveCfg = Release|x64
 		{AE77266F-0A23-4F08-A491-369DE664B273}.Release|x64.Build.0 = Release|x64
+		{67E33033-6E1D-47E6-9C6C-FAC732631822}.Debug|Win32.ActiveCfg = Debug|Win32
+		{67E33033-6E1D-47E6-9C6C-FAC732631822}.Debug|Win32.Build.0 = Debug|Win32
+		{67E33033-6E1D-47E6-9C6C-FAC732631822}.Debug|x64.ActiveCfg = Debug|x64
+		{67E33033-6E1D-47E6-9C6C-FAC732631822}.Debug|x64.Build.0 = Debug|x64
+		{67E33033-6E1D-47E6-9C6C-FAC732631822}.Release|Win32.ActiveCfg = Release|Win32
+		{67E33033-6E1D-47E6-9C6C-FAC732631822}.Release|Win32.Build.0 = Release|Win32
+		{67E33033-6E1D-47E6-9C6C-FAC732631822}.Release|x64.ActiveCfg = Release|x64
+		{67E33033-6E1D-47E6-9C6C-FAC732631822}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
